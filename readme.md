@@ -1,4 +1,4 @@
-@"
+
 # Curitiba Public Finance ETL
 
 Pipeline de engenharia de dados utilizando **Apache Airflow**, **PostgreSQL**, **Python** e **Docker** para processar dados públicos de **Receitas** e **Despesas** da Prefeitura de Curitiba.
