@@ -1,122 +1,57 @@
 # Curitiba Public Finance ETL
 
-Pipeline completo de engenharia de dados utilizando **Apache Airflow**, **PostgreSQL**, **Python** e **Docker** para processar dados públicos de **receitas** e **despesas** da Prefeitura de Curitiba.
+## Modern Data Engineering Pipeline with Airflow, Postgres and SQL
 
-O objetivo deste projeto é montar um fluxo de **ingestão, transformação e modelagem dimensional** em camadas (Staging, Silver e Gold), pronto para servir como base de análise em ferramentas de BI.
+Este projeto é um pipeline ETL (Extract, Transform, Load) completo e profissional, projetado para processar dados públicos de Receita e Despesa da cidade de Curitiba. Ele demonstra orquestração de nível de produção com **Apache Airflow** e um Data Warehouse multi-camadas utilizando **PostgreSQL** e **Docker**.
 
----
+A arquitetura segue o modelo clássico de camadas: **Staging, Silver e Gold**.
 
-## Índice
+## Destaques
 
-- [Visão geral](#visão-geral)
-- [Arquitetura](#arquitetura)
-- [Tecnologias](#tecnologias)
-- [Camadas de dados](#camadas-de-dados)
-- [Pipeline no Airflow](#pipeline-no-airflow)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [Como executar](#como-executar)
-- [Possíveis análises](#possíveis-análises)
-- [Próximos passos](#próximos-passos)
-- [Resumo em inglês](#resumo-em-inglês)
+| Categoria | Detalhe | Benefício para Portfólio | 
+ | ----- | ----- | ----- | 
+| **Orquestração** | Pipeline ETL End-to-End com Airflow e TaskGroups. | Demonstra domínio em agendamento e modularidade. | 
+| **Modelagem** | Data Warehouse Multi-camadas (Staging/Silver/Gold) e Star Schema. | Prova conhecimento em arquitetura e design de dados. | 
+| **Infraestrutura** | Ambiente totalmente containerizado com Docker Compose. | Mostra proficiência em ferramentas DevOps e reprodutibilidade. | 
+| **Transformação** | SQL-Driven Transformations (DDL/DML) com scripts modulares. | Evidencia habilidades sólidas em SQL e Engenharia de Dados. | 
+| **Dados** | Utilização de datasets públicos e reais de fontes governamentais. | Agrega valor de negócio e relevância prática. | 
 
----
+## Arquitetura do Data Pipeline
 
-## Visão geral
+O fluxo de dados é rigorosamente dividido em camadas para garantir a qualidade, rastreabilidade e desempenho analítico:
 
-Este projeto implementa:
+`CSV Data` → `Python Ingestion` → `Postgres (Staging)` → `SQL Transformations (Silver)` → `Dimensional Modeling (Gold)` → `Analytics Tools`
 
-- Ingestão de arquivos CSV de receitas e despesas da Prefeitura de Curitiba.
-- Armazenamento em tabelas de **staging** no PostgreSQL.
-- Transformações SQL para a camada **silver** com dados limpos e derivados.
-- Construção de dimensões e fatos na camada **gold**, seguindo um modelo próximo de star schema.
-- Orquestração de todo o fluxo com **Apache Airflow** usando **TaskGroups** para separar os pipelines.
+### O que Este Projeto Demonstra
 
-É um projeto pensado para portfólio de engenharia de dados, simulando um ambiente próximo de produção.
+* **Airflow Orchestration:** Uso de `TaskGroup` para organização, dependências claras e reutilização de código Python/SQL.
 
----
+* **Data Modeling:** Criação das dimensões (`dim_tempo`, `dim_orgao`, `dim_fonte`) e fatos (`fato_receita`, `fato_despesa`).
 
-## Arquitetura
+* **Pipeline Design:** Princípios de idempotência e reprodutibilidade aplicados em todas as camadas.
 
-```text
-Arquivos CSV
-    ↓
-Python (ingestão) + SQLAlchemy
-    ↓
-PostgreSQL (camada STAGING)
-    ↓
-SQL (transformações para camada SILVER)
-    ↓
-SQL (modelagem DIMENSÕES e FATOS na camada GOLD)
-    ↓
-BI / Analytics (Power BI, Metabase, Superset)
-Infraestrutura orquestrada via Docker Compose, com containers para:
+## Airflow Pipeline Overview
 
-Airflow Webserver
+O DAG (`etl_curitiba_financas_dag.py`) é estruturado da seguinte forma:
 
-Airflow Scheduler
+| TaskGroup | Responsabilidade | Tarefas SQL Chave | 
+ | ----- | ----- | ----- | 
+| `staging` | Ingestão inicial dos dados brutos. | `create_staging_tables` | 
+| `silver` | Transformações de limpeza e padronização. | `build_silver_layer` | 
+| `gold_dimensions` | Construção das tabelas Dimensionais. | `dim_tempo`, `dim_orgao`, `dim_fonte` | 
+| `gold_facts` | Construção das tabelas de Fato (Star Schema). | `fato_receita`, `fato_despesa` | 
 
-PostgreSQL
+## Tech Stack
 
-Tecnologias
-Tecnologia	Uso principal
-Apache Airflow	Orquestração de pipelines
-PostgreSQL	Data Warehouse local
-Docker Compose	Infraestrutura containerizada
-Python	Ingestão e conexão com o banco
-Pandas	Leitura e pré-processamento de CSV
-SQL (Postgres)	Transformações e modelagem
-Camadas de dados
-Staging
+| Tecnologia | Versão | Propósito | 
+ | ----- | ----- | ----- | 
+| **Apache Airflow** | Latest (Docker) | Orquestração do Pipeline | 
+| **PostgreSQL** | Latest (Docker) | Data Warehouse e Repositório de Metadados | 
+| **Docker Compose** | Latest | Definição e Gerenciamento da Infraestrutura | 
+| **Python** | 3.x | Ingestão (ETL) e Operadores Airflow | 
+| **SQL (Postgres)** | \- | Transformações (DML e DDL) | 
 
-Tabelas com dados mais próximos do CSV, porém tipados:
-
-stg_receitas
-
-stg_despesas
-
-Silver
-
-Tabelas com dados limpos, com colunas derivadas como ano e mês:
-
-silver_receitas
-
-silver_despesas
-
-Gold
-
-Dimensões:
-
-dim_tempo
-
-dim_orgao
-
-dim_fonte
-
-Fatos:
-
-fato_receita
-
-fato_despesa
-
-Pipeline no Airflow
-
-A DAG principal se chama etl_curitiba_financas e está organizada em TaskGroups:
-pipeline_staging
-    create_staging_tables
-
-pipeline_silver
-    build_silver_layer
-
-pipeline_gold_dimensions
-    build_dim_tempo
-    build_dim_orgao
-    build_dim_fonte
-
-pipeline_gold_facts
-    build_fato_receita
-    build_fato_despesa
-Estrutura do repositório
-curitiba-financas-airflow-etl/
+## Repository Structure
 │
 ├── dags/
 │   ├── etl_curitiba_financas_dag.py   # DAG do Airflow
