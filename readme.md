@@ -1,66 +1,81 @@
-📊 Curitiba Public Finance ETL – Data Engineering Pipeline with Airflow
+🚀 Curitiba Public Finance ETL
+Modern Data Engineering Pipeline with Airflow, Postgres and SQL
 
-This project implements a complete ETL pipeline using public Revenue and Expense datasets from the city of Curitiba (Brazil).
-The entire workflow is orchestrated by Apache Airflow, uses PostgreSQL as a Data Warehouse, and follows a modern multi-layer architecture (Staging → Silver → Gold) aligned with Data Engineering standards.
+This project is a complete ETL pipeline designed to process public revenue and expense data from the city of Curitiba. It demonstrates production-level orchestration, SQL transformations, modeling and containerized infrastructure using Airflow and Docker. The architecture follows the classic Staging, Silver and Gold multi-layer data approach.
 
-🚀 Project Purpose
+🌟 Key Highlights
 
-Build a modular, scalable and production-style data pipeline that:
+End to end ETL pipeline with Airflow
 
-Ingests monthly CSV datasets published by the city
+TaskGroup based pipeline orchestration
 
-Creates raw staging tables
+Multi layered Data Warehouse: Staging, Silver and Gold
 
-Cleans and transforms data into the silver layer
+Star Schema modeling with facts and dimensions
 
-Builds analytical dimensional models (star schema)
+SQL driven transformations with clean modular files
 
-Generates fact tables for financial analysis
+Fully containerized environment with Docker Compose
 
-Automates everything using Apache Airflow
+Public real world datasets from government sources
 
-This pipeline enables deep insights into public spending and revenue behavior.
+Ideal for interviews and portfolio demonstrations
 
-🏗️ Architecture Overview
-📁 CSV Data → 🐍 Python Ingestion → 🗄️ Postgres (Staging)
-       ↓
-   🛠️ SQL Transformations (Silver)
-       ↓
- 🌟 Gold Layer (Dimensions + Facts)
-       ↓
-📊 Analytics (Metabase / PowerBI / Superset)
+🏗️ Architecture
+CSV Data → Python Ingestion → Postgres (Staging)
+                 ↓
+           SQL Transformations (Silver)
+                 ↓
+         Dimensional Modeling (Gold)
+                 ↓
+     Analytics Tools (Power BI, Metabase)
 
-🔄 Airflow Pipeline Flow
-pipeline_staging
-   └── create_staging_tables
-        ↓
-pipeline_silver
-   └── build_silver_layer
-        ↓
-pipeline_gold_dimensions  (runs in parallel)
-   ├── build_dim_tempo
-   ├── build_dim_orgao
-   └── build_dim_fonte
-        ↓
-pipeline_gold_facts  (runs in parallel)
-   ├── build_fato_receita
-   └── build_fato_despesa
+🧠 What This Project Demonstrates
+Airflow Orchestration
 
+Scheduling, retries, task dependencies, jinja templated SQL, Python tasks and modular pipelines.
 
-Airflow uses TaskGroup to visually separate logical steps.
+Data Modeling
 
-📸 Example Airflow UI
+Creation of dimensions and facts, including dim_tempo, dim_orgao, dim_fonte, fato_receita and fato_despesa.
 
-(Replace with your own screenshots)
+SQL Engineering
 
-Staging → Silver → Gold Dimensions (parallel) → Gold Facts (parallel)
+Clear DDL and DML scripts for each transformation step.
 
-📂 Project Structure
-curitiba-financas-airflow-etl/
+Data Pipeline Design
+
+Separation of layers, idempotency, reproducibility and modular engineering.
+
+🔄 Airflow Pipeline Overview
+TaskGroup: staging
+    create_staging_tables
+
+TaskGroup: silver
+    build_silver_layer
+
+TaskGroup: gold_dimensions
+    dim_tempo
+    dim_orgao
+    dim_fonte
+
+TaskGroup: gold_facts
+    fato_receita
+    fato_despesa
+
+🛠️ Tech Stack
+Technology	Purpose
+Apache Airflow	Orchestration
+PostgreSQL	Data Warehouse
+Docker Compose	Infrastructure
+Python	Ingestion and operators
+SQL (Postgres)	Transformations
+📦 Repository Structure
+curitiba-financas-etl/
 │
 ├── dags/
-│   ├── etl_curitiba_financas_dag.py     # Airflow DAG with pipelines
-│   └── sql/                             # SQL scripts used by the pipeline
+│   ├── etl_curitiba_financas_dag.py
+│   └── sql/
 │       ├── create_staging_tables.sql
 │       ├── build_silver.sql
 │       ├── dim_tempo.sql
@@ -69,145 +84,32 @@ curitiba-financas-airflow-etl/
 │       ├── fato_receita.sql
 │       └── fato_despesa.sql
 │
-├── src/etl/
-│   ├── ingest_receitas.py               # optional ingestion scripts
-│   ├── ingest_despesas.py
-│
-├── airflow/                             # Docker-based Airflow environment
+├── airflow/
 │   ├── docker-compose.yaml
-│   └── Dockerfile (if used)
-│
-├── sql/                                  # SQL originals (local dev)
+│   └── Dockerfile
 │
 └── README.md
 
-🛠️ Technologies Used
-Technology	Purpose
-Apache Airflow 2.8+	Pipeline orchestration
-PostgreSQL 13	Data warehouse (staging, silver, gold layers)
-Docker Compose	Environment containerization
-Python 3.10+	CSV ingestion and transformations
-Pandas	Raw data handling
-SQL (PostgreSQL)	Silver and gold layer modeling
-TaskGroup	Organized pipeline grouping in Airflow
-⚙️ How to Run the Project
-1. Clone the Repository
-git clone https://github.com/YOUR-USER/curitiba-financas-airflow-etl.git
-cd curitiba-financas-airflow-etl
+📊 Analytical Possibilities
 
-2. Start the Airflow Environment
+Revenue trend monitoring
 
-Inside the Airflow folder:
+Expense behavior by organization
 
-cd airflow
-docker compose up -d
+Budget and actual comparisons
 
+Funding source analysis
 
-Access the Airflow UI:
+Month to month time series behavior
 
-http://localhost:8080
+🎯 Why This Project Stands Out
 
+Uses a real public dataset with business meaning
 
-Default login:
+Replicates professional warehouse architecture
 
-User: admin
+Shows mastery of Airflow, SQL and containerization
 
-Password: admin
+Ready to run, reproduce and showcase in interviews
 
-3. Set Up the Airflow Connection
-
-Navigate to:
-Admin → Connections → Add Connection
-
-Field	Value
-Conn Id	curitiba_postgres
-Conn Type	Postgres
-Host	postgres
-Schema	curitiba_financas
-Login	airflow
-Password	airflow
-Port	5432
-
-Click Test — it must show Success.
-
-4. Make SQL scripts available to Airflow
-copy .\sql\*.sql .\dags\sql\
-
-
-Verify inside the container:
-
-docker exec -it airflow-webserver-1 ls /opt/airflow/dags/sql
-
-5. Run the Pipeline
-
-In the Airflow UI:
-
-Enable the DAG etl_curitiba_financas
-
-Click Trigger DAG
-
-Watch the Staging → Silver → Gold pipeline run
-
-📚 Data Warehouse Modeling
-🟪 Silver Layer
-
-Standardized fields and derived attributes:
-
-Year/Month fields
-
-Cleaned and normalized values
-
-Proper typing (numeric/date)
-
-⭐ Gold Dimensions
-
-dim_tempo — calendar dimension
-
-dim_orgao — government organizations
-
-dim_fonte — funding source (merged from expenses + revenues)
-
-💠 Gold Facts
-Fact Tables
-
-fato_receita
-
-Aggregated revenue by date, source, company, and type
-
-fato_despesa
-
-Summarized expenses by date, orgão, program, action, and function
-
-📊 Possible Analytics
-
-This DW enables analyses like:
-
-Monthly revenue trends
-
-Expense behavior by government organization
-
-Budget vs actual spending
-
-Analysis by program, action, or function
-
-Comparison between funding sources
-
-Revenue vs payments over time
-
-🔮 Future Improvements (Roadmap)
-
- Add file sensors for automated ingestion
-
- Build ingestion directly from Curitiba Transparency Portal
-
- Add Data Quality checks (SQL or Great Expectations)
-
- Publish Gold layer in Parquet (Lakehouse)
-
- Add dashboards (Superset / Metabase / PowerBI)
-
- Make pipeline incremental by month
-
-📝 License
-
-MIT License - free for academic, personal, and professional use.
+Clean and modular code following best practices
