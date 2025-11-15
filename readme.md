@@ -1,60 +1,173 @@
+@"
 # Curitiba Public Finance ETL
 
-## Modern Data Engineering Pipeline with Airflow, Postgres and SQL
+Pipeline de engenharia de dados utilizando **Apache Airflow**, **PostgreSQL**, **Python** e **Docker** para processar dados públicos de **Receitas** e **Despesas** da Prefeitura de Curitiba.
 
-Este projeto é um pipeline ETL (Extract, Transform, Load) completo e profissional, projetado para processar dados públicos de Receita e Despesa da cidade de Curitiba. Ele demonstra orquestração de nível de produção com **Apache Airflow** e um Data Warehouse multi-camadas utilizando **PostgreSQL** e **Docker**.
+O objetivo deste projeto é montar um fluxo completo de **ingestão, transformação e modelagem dimensional** em camadas (Staging, Silver e Gold), pronto para servir como base de análise em ferramentas de BI.
 
-A arquitetura segue o modelo clássico de camadas: **Staging, Silver e Gold**.
+---
 
-## Destaques
+## Índice
 
-| Categoria | Detalhe | Benefício para Portfólio | 
- | ----- | ----- | ----- | 
-| **Orquestração** | Pipeline ETL End-to-End com Airflow e TaskGroups. | Demonstra domínio em agendamento e modularidade. | 
-| **Modelagem** | Data Warehouse Multi-camadas (Staging/Silver/Gold) e Star Schema. | Prova conhecimento em arquitetura e design de dados. | 
-| **Infraestrutura** | Ambiente totalmente containerizado com Docker Compose. | Mostra proficiência em ferramentas DevOps e reprodutibilidade. | 
-| **Transformação** | SQL-Driven Transformations (DDL/DML) com scripts modulares. | Evidencia habilidades sólidas em SQL e Engenharia de Dados. | 
-| **Dados** | Utilização de datasets públicos e reais de fontes governamentais. | Agrega valor de negócio e relevância prática. | 
+- [Visão geral](#visão-geral)
+- [Fonte dos dados](#fonte-dos-dados)
+- [Arquitetura](#arquitetura)
+- [Tecnologias](#tecnologias)
+- [Camadas de dados](#camadas-de-dados)
+- [Pipeline no Airflow](#pipeline-no-airflow)
+- [Estrutura do repositório](#estrutura-do-repositório)
+- [Como executar](#como-executar)
+- [Possíveis análises](#possíveis-análises)
+- [Próximos passos](#próximos-passos)
+- [Resumo em inglês](#resumo-em-inglês)
 
-## Arquitetura do Data Pipeline
+---
 
-O fluxo de dados é rigorosamente dividido em camadas para garantir a qualidade, rastreabilidade e desempenho analítico:
+## Visão geral
 
-`CSV Data` → `Python Ingestion` → `Postgres (Staging)` → `SQL Transformations (Silver)` → `Dimensional Modeling (Gold)` → `Analytics Tools`
+Este projeto implementa um fluxo de ETL com foco nas finanças públicas do município de Curitiba. A partir de arquivos CSV de **Receitas** e **Despesas**, o pipeline:
 
-### O que Este Projeto Demonstra
+- faz ingestão dos dados em um banco PostgreSQL;
+- organiza as informações em camadas de dados (Staging, Silver, Gold);
+- constrói dimensões e fatos para análise financeira;
+- orquestra todas as etapas com Apache Airflow, rodando em containers Docker.
 
-* **Airflow Orchestration:** Uso de `TaskGroup` para organização, dependências claras e reutilização de código Python/SQL.
+O resultado é um pequeno Data Warehouse local, pronto para ser consumido por ferramentas de BI ou usado como case de portfólio em engenharia de dados.
 
-* **Data Modeling:** Criação das dimensões (`dim_tempo`, `dim_orgao`, `dim_fonte`) e fatos (`fato_receita`, `fato_despesa`).
+---
 
-* **Pipeline Design:** Princípios de idempotência e reprodutibilidade aplicados em todas as camadas.
+## Fonte dos dados
 
-## Airflow Pipeline Overview
+Todos os dados utilizados neste projeto são públicos e foram obtidos no:
 
-O DAG (`etl_curitiba_financas_dag.py`) é estruturado da seguinte forma:
+**Portal de Dados Abertos da Prefeitura de Curitiba**  
+https://dadosabertos.curitiba.pr.gov.br
 
-| TaskGroup | Responsabilidade | Tarefas SQL Chave | 
- | ----- | ----- | ----- | 
-| `staging` | Ingestão inicial dos dados brutos. | `create_staging_tables` | 
-| `silver` | Transformações de limpeza e padronização. | `build_silver_layer` | 
-| `gold_dimensions` | Construção das tabelas Dimensionais. | `dim_tempo`, `dim_orgao`, `dim_fonte` | 
-| `gold_facts` | Construção das tabelas de Fato (Star Schema). | `fato_receita`, `fato_despesa` | 
+Os arquivos utilizados correspondem às bases de:
 
-## Tech Stack
+- **Receitas** do município de Curitiba, em formato CSV.
+- **Despesas** do município de Curitiba, em formato CSV.
 
-| Tecnologia | Versão | Propósito | 
- | ----- | ----- | ----- | 
-| **Apache Airflow** | Latest (Docker) | Orquestração do Pipeline | 
-| **PostgreSQL** | Latest (Docker) | Data Warehouse e Repositório de Metadados | 
-| **Docker Compose** | Latest | Definição e Gerenciamento da Infraestrutura | 
-| **Python** | 3.x | Ingestão (ETL) e Operadores Airflow | 
-| **SQL (Postgres)** | \- | Transformações (DML e DDL) | 
+Esses dados são mantidos e publicados pela própria Prefeitura de Curitiba para fins de transparência e controle social. O projeto não altera o significado dos dados, apenas os organiza e modela para fins analíticos.
 
-## Repository Structure
+---
+
+## Arquitetura
+
+```text
+Arquivos CSV (Receitas e Despesas)
+    ↓
+Python (ingestão) + SQLAlchemy
+    ↓
+PostgreSQL (camada STAGING)
+    ↓
+SQL (transformações para camada SILVER)
+    ↓
+SQL (modelagem DIMENSÕES e FATOS na camada GOLD)
+    ↓
+BI / Analytics (Power BI, Metabase, Superset)
+```
+
+A infraestrutura é orquestrada via **Docker Compose**, com containers separados para:
+
+- Airflow Webserver
+- Airflow Scheduler
+- PostgreSQL
+
+---
+
+## Tecnologias
+
+| Tecnologia      | Uso principal                         |
+|-----------------|---------------------------------------|
+| Apache Airflow  | Orquestração de pipelines de dados    |
+| PostgreSQL      | Data Warehouse local                  |
+| Docker Compose  | Infraestrutura containerizada         |
+| Python          | Ingestão dos CSV e conexão com o banco|
+| Pandas          | Leitura e pré-processamento dos CSV   |
+| SQL (Postgres)  | Transformações e modelagem dimensional|
+
+---
+
+## Camadas de dados
+
+### Staging
+
+Camada bruta tipada, espelhando a estrutura dos CSV com o mínimo de tratamento necessário para armazenamento.
+
+Tabelas principais:
+
+- `stg_receitas`
+- `stg_despesas`
+
+### Silver
+
+Camada refinada, com dados limpos e colunas derivadas, pronta para servir de base para modelagem analítica.
+
+Tabelas principais:
+
+- `silver_receitas`
+- `silver_despesas`
+
+Exemplos de tratamentos:
+
+- padronização de tipos numéricos e datas;
+- extração de ano e mês;
+- limpeza de registros vazios ou inválidos.
+
+### Gold
+
+Camada de Data Warehouse, organizada em dimensões e fatos, próxima de um modelo estrela.
+
+Dimensões:
+
+- `dim_tempo`
+- `dim_orgao`
+- `dim_fonte`
+
+Fatos:
+
+- `fato_receita`
+- `fato_despesa`
+
+Essas tabelas podem ser conectadas diretamente a ferramentas de BI para construção de painéis e relatórios.
+
+---
+
+## Pipeline no Airflow
+
+A DAG principal se chama **`etl_curitiba_financas`**. Ela está organizada em **TaskGroups** para deixar o fluxo mais legível e modular.
+
+Fluxo lógico:
+
+```text
+pipeline_staging
+    create_staging_tables
+
+pipeline_silver
+    build_silver_layer
+
+pipeline_gold_dimensions
+    build_dim_tempo
+    build_dim_orgao
+    build_dim_fonte
+
+pipeline_gold_facts
+    build_fato_receita
+    build_fato_despesa
+```
+
+Os grupos de dimensões e fatos na camada gold são executados em paralelo dentro de seus respectivos TaskGroups, reduzindo o tempo total de execução.
+
+---
+
+## Estrutura do repositório
+
+```text
+curitiba-financas-airflow-etl/
 │
 ├── dags/
-│   ├── etl_curitiba_financas_dag.py   # DAG do Airflow
+│   ├── etl_curitiba_financas_dag.py   # DAG principal do Airflow
 │   └── sql/                           # Scripts SQL usados pela DAG
 │       ├── create_staging_tables.sql
 │       ├── build_silver.sql
@@ -66,109 +179,118 @@ O DAG (`etl_curitiba_financas_dag.py`) é estruturado da seguinte forma:
 │
 ├── src/
 │   └── etl/
-│       ├── ingest_receitas.py         # ingestão de receitas
-│       └── ingest_despesas.py         # ingestão de despesas
+│       ├── ingest_receitas.py         # ingestão das receitas
+│       └── ingest_despesas.py         # ingestão das despesas
 │
 ├── airflow/
 │   ├── docker-compose.yaml            # stack do Airflow + Postgres
 │   └── Dockerfile                     # customizações de imagem (se houver)
 │
+├── sql/                               # SQL original usado em desenvolvimento
+│
 └── README.md
+```
 
-Como executar
-1. Clonar o repositório
+---
+
+## Como executar
+
+### 1. Clonar o repositório
+
+```bash
 git clone https://github.com/SEU-USUARIO/curitiba-financas-airflow-etl.git
 cd curitiba-financas-airflow-etl
+```
 
-2. Subir o ambiente do Airflow
+### 2. Subir o ambiente do Airflow
+
+```bash
 cd airflow
 docker compose up -d
+```
 
+Por padrão, o Airflow estará acessível em:
 
-Acesse o Airflow em:
-
+```text
 http://localhost:8081
+```
 
+Usuário e senha padrão (caso não tenha sido alterado):
 
-Usuário e senha padrão (caso não tenha alterado):
+- usuário: `admin`
+- senha: `admin`
 
-usuário: admin
-
-senha: admin
-
-3. Configurar a conexão Postgres no Airflow
+### 3. Configurar a conexão Postgres no Airflow
 
 No menu do Airflow:
 
-Admin → Connections → +
+- `Admin` → `Connections` → `+`
 
 Preencha:
 
-Conn Id: curitiba_postgres
+- Conn Id: `curitiba_postgres`
+- Conn Type: `Postgres`
+- Host: `postgres`
+- Schema: `curitiba_financas`
+- Login: `airflow`
+- Password: `airflow`
+- Port: `5432`
 
-Conn Type: Postgres
+Clique em **Test** e depois salve.
 
-Host: postgres
+### 4. Garantir que os scripts SQL estão acessíveis
 
-Schema: curitiba_financas
+Na máquina host, certifique-se de que os arquivos SQL estão em `dags/sql`. Se necessário:
 
-Login: airflow
-
-Password: airflow
-
-Port: 5432
-
-Clique em Test e salve.
-
-4. Garantir que os SQLs estão acessíveis
-
-Na máquina host:
-
+```bash
+# Exemplo em Windows PowerShell
 cd C:\Users\vinic\curitiba-financas-airflow-etl
 copy .\sql\*.sql .\dags\sql\
+```
 
+Dentro do container do webserver:
 
-Dentro do container:
-
+```bash
 docker exec -it airflow-webserver-1 ls /opt/airflow/dags/sql
+```
 
+Os arquivos `.sql` devem aparecer listados.
 
-Os arquivos .sql devem aparecer listados.
-
-5. Rodar a DAG
+### 5. Rodar a DAG
 
 No Airflow:
 
-Ative a DAG etl_curitiba_financas.
+1. Ative a DAG `etl_curitiba_financas` na tela inicial.
+2. Clique em `Trigger DAG` para iniciar a execução.
+3. Acompanhe o fluxo na aba `Graph` ou `Grid`.
 
-Clique em Trigger DAG.
+---
 
-Acompanhe a execução na aba Graph ou Grid.
+## Possíveis análises
 
-Possíveis análises
+Com a camada gold criada, este projeto permite responder perguntas como:
 
-Com a camada gold criada, é possível responder perguntas como:
+- Qual a evolução mensal da receita do município em cada exercício.
+- Quais órgãos mais gastam e em que tipos de despesa.
+- Quais programas, ações e funções concentram maior volume de despesas.
+- Como se comparam valores empenhados, liquidados e pagos ao longo do tempo.
+- Como diferentes fontes de recurso são distribuídas entre órgãos e programas.
 
-Qual foi a evolução mensal da receita do município por exercício.
+---
 
-Quanto cada órgão gastou por mês, função, programa ou ação.
+## Próximos passos
 
-Comparação de valores empenhados, liquidados e pagos.
+Ideias de evolução do projeto:
 
-Distribuição de despesas por fonte de recurso.
+- Ingestão incremental automática conforme novos CSVs forem publicados no portal.
+- Criação de verificações de qualidade de dados (data quality checks) usando SQL ou Great Expectations.
+- Exportar a camada gold para arquivos Parquet, simulando um data lake.
+- Conectar diretamente a camada gold em Metabase, Superset ou Power BI.
+- Adicionar testes automatizados para scripts de ingestão e para as principais transformações SQL.
 
-Séries temporais de receitas e despesas ao longo dos anos.
+---
 
-Próximos passos
 
-Ideias para evolução do projeto:
 
-Ingestão incremental automática conforme novos CSVs são publicados.
-
-Adição de data quality checks usando SQL ou Great Expectations.
-
-Exportar a camada gold em Parquet para um data lake.
-
-Conectar a camada gold em Metabase, Superset ou Power BI.
-
-Adicionar testes automatizados para scripts de ingestão e SQL.
+This project implements a complete data engineering pipeline using public revenue and expense datasets from the city of Curitiba, obtained from the official open data portal (https://dadosabertos.curitiba.pr.gov.br). The pipeline runs on Apache Airflow and PostgreSQL, following a multilayer architecture with staging, silver and gold layers. The gold layer exposes dimension and fact tables that can be directly consumed by BI tools to analyze public revenue and spending over time.
+"@ | Set-Content -Encoding UTF8 README.md
