@@ -280,7 +280,7 @@ Com a camada gold criada, este projeto permite responder perguntas como:
 
 ## Próximos passos
 
-Ideias de evolução do projeto:
+Futuramente trabalharei em:
 
 - Ingestão incremental automática conforme novos CSVs forem publicados no portal.
 - Criação de verificações de qualidade de dados (data quality checks) usando SQL ou Great Expectations.
