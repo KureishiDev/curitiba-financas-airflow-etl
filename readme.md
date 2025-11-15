@@ -1,4 +1,4 @@
-🚀 Curitiba Public Finance ETL
+Curitiba Public Finance ETL
 
 Modern Data Engineering Pipeline with Airflow, Postgres and SQL
 
@@ -6,7 +6,7 @@ Este projeto é um pipeline ETL (Extract, Transform, Load) completo e profission
 
 A arquitetura segue o modelo clássico de camadas: Staging, Silver e Gold.
 
-🌟 Key Highlights
+Destaques
 
 Categoria
 
@@ -44,19 +44,13 @@ Utilização de datasets públicos e reais de fontes governamentais.
 
 Agrega valor de negócio e relevância prática.
 
-🏗️ Arquitetura do Data Pipeline
+Arquitetura do Data Pipeline
 
-O fluxo de dados é rigorosamente dividido em camadas para garantir a qualidade, rastreabilidade e desempenho analítico.
+O fluxo de dados é rigorosamente dividido em camadas para garantir a qualidade, rastreabilidade e desempenho analítico:
 
-graph LR
-    A[CSV Data] --> B(Python Ingestion);
-    B --> C(Postgres :: Staging);
-    C --> D(SQL Transformations :: Silver);
-    D --> E(Dimensional Modeling :: Gold);
-    E --> F(Analytics Tools: Power BI, Metabase);
+CSV Data → Python Ingestion → Postgres (Staging) → SQL Transformations (Silver) → Dimensional Modeling (Gold) → Analytics Tools
 
-
-🧠 O que Este Projeto Demonstra
+O que Este Projeto Demonstra
 
 Airflow Orchestration: Uso de TaskGroup para organização, dependências claras e reutilização de código Python/SQL.
 
@@ -64,7 +58,7 @@ Data Modeling: Criação das dimensões (dim_tempo, dim_orgao, dim_fonte) e fato
 
 Pipeline Design: Princípios de idempotência e reprodutibilidade aplicados em todas as camadas.
 
-🔄 Airflow Pipeline Overview
+Airflow Pipeline Overview
 
 O DAG (etl_curitiba_financas_dag.py) é estruturado da seguinte forma:
 
@@ -98,7 +92,7 @@ Construção das tabelas de Fato (Star Schema).
 
 fato_receita, fato_despesa
 
-🛠️ Tech Stack
+Tech Stack
 
 Tecnologia
 
@@ -136,7 +130,7 @@ SQL (Postgres)
 
 Transformações (DML e DDL)
 
-📦 Repository Structure
+Repository Structure
 
 curitiba-financas-etl/
 │
@@ -158,7 +152,7 @@ curitiba-financas-etl/
 └── README.md
 
 
-⚙️ Como Rodar o Projeto (Setup)
+Como Rodar o Projeto (Setup)
 
 Pré-requisitos: Certifique-se de ter o Docker e o Docker Compose instalados.
 
